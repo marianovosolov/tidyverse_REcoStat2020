@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Data wrangling with tidyverse</title>
+    <meta charset="utf-8" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <script src="libs/xaringanExtra-logo/logo.js"></script>
+    <link rel="stylesheet" href="custom-fonts.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Data wrangling with <code>tidyverse</code>
+## Maria Novosolov
+### 27-04-2020
+
+---
+
+
+
+<style type="text/css">
+.xaringan-extra-logo {
+  width: 110px;
+  height: 128px;
+  z-index: 0;
+  background-image: url('img/tidyverse.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  position: absolute;
+  top:1em;right:1em;
+}
+</style>
+
+# Tidyverse is a collection of packages
+.center[
+&lt;img src="img/tidyverse_core.png" width=50%&gt;
+]
+
+---
+
+# The advantages
+
+.large[
+- shared syntax &amp; conventions
+
+
+- tibble/data.frame in, tibble out
+
+- neat code
+
+]
+---
+
+# Tidy data
+
+&gt;If I had one thing to tell biologists learning bioinformatics, it would be “write code for humans, write data for computers”.
+&gt;
+&gt;— Vince Buffalo (@vsbuffalo) July 20, 2013
+
+---
+
+|Film                       |Gender |Race   | Words|
+|:--------------------------|:------|:------|-----:|
+|The Fellowship Of The Ring |Female |Elf    |  1229|
+|The Fellowship Of The Ring |Male   |Elf    |   971|
+|The Fellowship Of The Ring |Female |Hobbit |    14|
+|The Fellowship Of The Ring |Male   |Hobbit |  3644|
+|The Fellowship Of The Ring |Female |Man    |     0|
+|The Fellowship Of The Ring |Male   |Man    |  1995|
+|The Two Towers             |Female |Elf    |   331|
+|The Two Towers             |Male   |Elf    |   513|
+|The Two Towers             |Female |Hobbit |     0|
+|The Two Towers             |Male   |Hobbit |  2463|
+
+---
+
+# Does your code resemble this?
+
+
+```r
+starwars_human_subset &lt;- subset(starwars,species == "Human")
+starwars_human_subset$bmi &lt;- starwars_human_subset$mass / 
+  (0.01 * starwars_human_subset$height)^2
+fattest_human_from_each_planet &lt;- aggregate(bmi ~ homeworld,data = 
+      starwars_human_subset, FUN = "max")
+fattest_human_from_each_planet &lt;- merge(
+  x=fattest_human_from_each_planet,
+  y=starwars_human_subset,by = c("homeworld","bmi"))
+fattest_human_from_each_planet &lt;- fattest_human_from_each_planet [,1:5]
+```
+
+![](https://jamesskemp.github.io/gits-matrix/images/green6.jpg)
+
+---
+# Code should be pleasant to read
+
+![](https://media.giphy.com/media/OWyYSmZT43pxm/giphy.gif)
+
+---
+# Tibbles
+
+&gt;Tibbles are data.frames that are lazy and surly: **they do less** (i.e. they don't change variable names or types, and don't do partial matching) and **complain more** (e.g. when a variable does not exist). This forces you to confront problems earlier, typically leading to cleaner, more expressive code.
+
+.center[
+&lt;img src="img/tibble.png" width=20%&gt;
+]
+
+https://tibble.tidyverse.org/
+
+---
+# `data.frame`
+
+
+```r
+iris
+```
+
+```
+##     Sepal.Length Sepal.Width Petal.Length Petal.Width    Species
+## 1            5.1         3.5          1.4         0.2     setosa
+## 2            4.9         3.0          1.4         0.2     setosa
+## 3            4.7         3.2          1.3         0.2     setosa
+## 4            4.6         3.1          1.5         0.2     setosa
+## 5            5.0         3.6          1.4         0.2     setosa
+## 6            5.4         3.9          1.7         0.4     setosa
+## 7            4.6         3.4          1.4         0.3     setosa
+## 8            5.0         3.4          1.5         0.2     setosa
+## 9            4.4         2.9          1.4         0.2     setosa
+## 10           4.9         3.1          1.5         0.1     setosa
+## 11           5.4         3.7          1.5         0.2     setosa
+## 12           4.8         3.4          1.6         0.2     setosa
+## 13           4.8         3.0          1.4         0.1     setosa
+## 14           4.3         3.0          1.1         0.1     setosa
+## 15           5.8         4.0          1.2         0.2     setosa
+## 16           5.7         4.4          1.5         0.4     setosa
+## 17           5.4         3.9          1.3         0.4     setosa
+## 18           5.1         3.5          1.4         0.3     setosa
+## 19           5.7         3.8          1.7         0.3     setosa
+## 20           5.1         3.8          1.5         0.3     setosa
+## 21           5.4         3.4          1.7         0.2     setosa
+## 22           5.1         3.7          1.5         0.4     setosa
+## 23           4.6         3.6          1.0         0.2     setosa
+## 24           5.1         3.3          1.7         0.5     setosa
+## 25           4.8         3.4          1.9         0.2     setosa
+## 26           5.0         3.0          1.6         0.2     setosa
+## 27           5.0         3.4          1.6         0.4     setosa
+## 28           5.2         3.5          1.5         0.2     setosa
+## 29           5.2         3.4          1.4         0.2     setosa
+## 30           4.7         3.2          1.6         0.2     setosa
+## 31           4.8         3.1          1.6         0.2     setosa
+## 32           5.4         3.4          1.5         0.4     setosa
+## 33           5.2         4.1          1.5         0.1     setosa
+## 34           5.5         4.2          1.4         0.2     setosa
+## 35           4.9         3.1          1.5         0.2     setosa
+## 36           5.0         3.2          1.2         0.2     setosa
+## 37           5.5         3.5          1.3         0.2     setosa
+## 38           4.9         3.6          1.4         0.1     setosa
+## 39           4.4         3.0          1.3         0.2     setosa
+## 40           5.1         3.4          1.5         0.2     setosa
+## 41           5.0         3.5          1.3         0.3     setosa
+## 42           4.5         2.3          1.3         0.3     setosa
+## 43           4.4         3.2          1.3         0.2     setosa
+## 44           5.0         3.5          1.6         0.6     setosa
+## 45           5.1         3.8          1.9         0.4     setosa
+## 46           4.8         3.0          1.4         0.3     setosa
+## 47           5.1         3.8          1.6         0.2     setosa
+## 48           4.6         3.2          1.4         0.2     setosa
+## 49           5.3         3.7          1.5         0.2     setosa
+## 50           5.0         3.3          1.4         0.2     setosa
+## 51           7.0         3.2          4.7         1.4 versicolor
+## 52           6.4         3.2          4.5         1.5 versicolor
+## 53           6.9         3.1          4.9         1.5 versicolor
+## 54           5.5         2.3          4.0         1.3 versicolor
+## 55           6.5         2.8          4.6         1.5 versicolor
+## 56           5.7         2.8          4.5         1.3 versicolor
+## 57           6.3         3.3          4.7         1.6 versicolor
+## 58           4.9         2.4          3.3         1.0 versicolor
+## 59           6.6         2.9          4.6         1.3 versicolor
+## 60           5.2         2.7          3.9         1.4 versicolor
+## 61           5.0         2.0          3.5         1.0 versicolor
+## 62           5.9         3.0          4.2         1.5 versicolor
+## 63           6.0         2.2          4.0         1.0 versicolor
+## 64           6.1         2.9          4.7         1.4 versicolor
+## 65           5.6         2.9          3.6         1.3 versicolor
+## 66           6.7         3.1          4.4         1.4 versicolor
+## 67           5.6         3.0          4.5         1.5 versicolor
+## 68           5.8         2.7          4.1         1.0 versicolor
+## 69           6.2         2.2          4.5         1.5 versicolor
+## 70           5.6         2.5          3.9         1.1 versicolor
+## 71           5.9         3.2          4.8         1.8 versicolor
+## 72           6.1         2.8          4.0         1.3 versicolor
+## 73           6.3         2.5          4.9         1.5 versicolor
+## 74           6.1         2.8          4.7         1.2 versicolor
+## 75           6.4         2.9          4.3         1.3 versicolor
+## 76           6.6         3.0          4.4         1.4 versicolor
+## 77           6.8         2.8          4.8         1.4 versicolor
+## 78           6.7         3.0          5.0         1.7 versicolor
+## 79           6.0         2.9          4.5         1.5 versicolor
+## 80           5.7         2.6          3.5         1.0 versicolor
+## 81           5.5         2.4          3.8         1.1 versicolor
+## 82           5.5         2.4          3.7         1.0 versicolor
+## 83           5.8         2.7          3.9         1.2 versicolor
+## 84           6.0         2.7          5.1         1.6 versicolor
+## 85           5.4         3.0          4.5         1.5 versicolor
+## 86           6.0         3.4          4.5         1.6 versicolor
+## 87           6.7         3.1          4.7         1.5 versicolor
+## 88           6.3         2.3          4.4         1.3 versicolor
+## 89           5.6         3.0          4.1         1.3 versicolor
+## 90           5.5         2.5          4.0         1.3 versicolor
+## 91           5.5         2.6          4.4         1.2 versicolor
+## 92           6.1         3.0          4.6         1.4 versicolor
+## 93           5.8         2.6          4.0         1.2 versicolor
+## 94           5.0         2.3          3.3         1.0 versicolor
+## 95           5.6         2.7          4.2         1.3 versicolor
+## 96           5.7         3.0          4.2         1.2 versicolor
+## 97           5.7         2.9          4.2         1.3 versicolor
+## 98           6.2         2.9          4.3         1.3 versicolor
+## 99           5.1         2.5          3.0         1.1 versicolor
+## 100          5.7         2.8          4.1         1.3 versicolor
+## 101          6.3         3.3          6.0         2.5  virginica
+## 102          5.8         2.7          5.1         1.9  virginica
+## 103          7.1         3.0          5.9         2.1  virginica
+## 104          6.3         2.9          5.6         1.8  virginica
+## 105          6.5         3.0          5.8         2.2  virginica
+## 106          7.6         3.0          6.6         2.1  virginica
+## 107          4.9         2.5          4.5         1.7  virginica
+## 108          7.3         2.9          6.3         1.8  virginica
+## 109          6.7         2.5          5.8         1.8  virginica
+## 110          7.2         3.6          6.1         2.5  virginica
+## 111          6.5         3.2          5.1         2.0  virginica
+## 112          6.4         2.7          5.3         1.9  virginica
+## 113          6.8         3.0          5.5         2.1  virginica
+## 114          5.7         2.5          5.0         2.0  virginica
+## 115          5.8         2.8          5.1         2.4  virginica
+## 116          6.4         3.2          5.3         2.3  virginica
+## 117          6.5         3.0          5.5         1.8  virginica
+## 118          7.7         3.8          6.7         2.2  virginica
+## 119          7.7         2.6          6.9         2.3  virginica
+## 120          6.0         2.2          5.0         1.5  virginica
+## 121          6.9         3.2          5.7         2.3  virginica
+## 122          5.6         2.8          4.9         2.0  virginica
+## 123          7.7         2.8          6.7         2.0  virginica
+## 124          6.3         2.7          4.9         1.8  virginica
+## 125          6.7         3.3          5.7         2.1  virginica
+## 126          7.2         3.2          6.0         1.8  virginica
+## 127          6.2         2.8          4.8         1.8  virginica
+## 128          6.1         3.0          4.9         1.8  virginica
+## 129          6.4         2.8          5.6         2.1  virginica
+## 130          7.2         3.0          5.8         1.6  virginica
+## 131          7.4         2.8          6.1         1.9  virginica
+## 132          7.9         3.8          6.4         2.0  virginica
+## 133          6.4         2.8          5.6         2.2  virginica
+## 134          6.3         2.8          5.1         1.5  virginica
+## 135          6.1         2.6          5.6         1.4  virginica
+## 136          7.7         3.0          6.1         2.3  virginica
+## 137          6.3         3.4          5.6         2.4  virginica
+## 138          6.4         3.1          5.5         1.8  virginica
+## 139          6.0         3.0          4.8         1.8  virginica
+## 140          6.9         3.1          5.4         2.1  virginica
+## 141          6.7         3.1          5.6         2.4  virginica
+## 142          6.9         3.1          5.1         2.3  virginica
+## 143          5.8         2.7          5.1         1.9  virginica
+## 144          6.8         3.2          5.9         2.3  virginica
+## 145          6.7         3.3          5.7         2.5  virginica
+## 146          6.7         3.0          5.2         2.3  virginica
+## 147          6.3         2.5          5.0         1.9  virginica
+## 148          6.5         3.0          5.2         2.0  virginica
+## 149          6.2         3.4          5.4         2.3  virginica
+## 150          5.9         3.0          5.1         1.8  virginica
+```
+
+---
+# Tibbles print nicely!
+
+
+```r
+library(tidyverse)
+as_tibble(iris)
+```
+
+```
+## # A tibble: 150 x 5
+##    Sepal.Length Sepal.Width Petal.Length Petal.Width Species
+##           &lt;dbl&gt;       &lt;dbl&gt;        &lt;dbl&gt;       &lt;dbl&gt; &lt;fct&gt;  
+##  1          5.1         3.5          1.4         0.2 setosa 
+##  2          4.9         3            1.4         0.2 setosa 
+##  3          4.7         3.2          1.3         0.2 setosa 
+##  4          4.6         3.1          1.5         0.2 setosa 
+##  5          5           3.6          1.4         0.2 setosa 
+##  6          5.4         3.9          1.7         0.4 setosa 
+##  7          4.6         3.4          1.4         0.3 setosa 
+##  8          5           3.4          1.5         0.2 setosa 
+##  9          4.4         2.9          1.4         0.2 setosa 
+## 10          4.9         3.1          1.5         0.1 setosa 
+## # … with 140 more rows
+```
+
+---
+
+class: inverse, center, middle
+
+# Let's go over the syntax
+
+---
+# `dplyr` function
+
+.center[
+&lt;img src="img/dplyr.png" width=30%&gt;
+]
+
+---
+
+# `select()`
+
+![](img/xls-select.PNG)
+
+---
+
+# `filter()`
+
+![](img/xls-filter.PNG)
+
+---
+# `arrange()`
+
+![](img/xls-arrange.PNG)
+---
+
+# `mutate()`
+
+![](img/xls-mutate.PNG)
+---
+
+# `group_by(), summarize()`
+
+![](img/xls-summary.PNG)
+---
+
+# Pipe ("then")
+
+.pull-left[
+![](img/pipe.png)
+]
+
+.pull-right[
+Data in, data out
+
+
+```r
+do_another_thing(do_something(data))
+
+# versus
+
+data %&gt;% 
+    do_something() %&gt;% 
+    do_another_thing() 
+```
+]
+
+
+--- 
+---
+class: inverse, center, middle
+
+# Lets start practicing 
+---
+
+# Load the Star Wars data
+
+
+```r
+library(tidyverse)
+data(starwars)
+starwars
+```
+
+```
+## # A tibble: 87 x 13
+##    name  height  mass hair_color skin_color eye_color birth_year gender
+##    &lt;chr&gt;  &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt; 
+##  1 Luke…    172    77 blond      fair       blue            19   male  
+##  2 C-3PO    167    75 &lt;NA&gt;       gold       yellow         112   &lt;NA&gt;  
+##  3 R2-D2     96    32 &lt;NA&gt;       white, bl… red             33   &lt;NA&gt;  
+##  4 Dart…    202   136 none       white      yellow          41.9 male  
+##  5 Leia…    150    49 brown      light      brown           19   female
+##  6 Owen…    178   120 brown, gr… light      blue            52   male  
+##  7 Beru…    165    75 brown      light      blue            47   female
+##  8 R5-D4     97    32 &lt;NA&gt;       white, red red             NA   &lt;NA&gt;  
+##  9 Bigg…    183    84 black      light      brown           24   male  
+## 10 Obi-…    182    77 auburn, w… fair       blue-gray       57   male  
+## # … with 77 more rows, and 5 more variables: homeworld &lt;chr&gt;, species &lt;chr&gt;,
+## #   films &lt;list&gt;, vehicles &lt;list&gt;, starships &lt;list&gt;
+```
+---
+# Select the name, height, mass, and species columns only
+
+--
+
+```r
+starwars %&gt;% 
+    select(name, height, mass, species)
+```
+
+```
+## # A tibble: 87 x 4
+##    name               height  mass species
+##    &lt;chr&gt;               &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;  
+##  1 Luke Skywalker        172    77 Human  
+##  2 C-3PO                 167    75 Droid  
+##  3 R2-D2                  96    32 Droid  
+##  4 Darth Vader           202   136 Human  
+##  5 Leia Organa           150    49 Human  
+##  6 Owen Lars             178   120 Human  
+##  7 Beru Whitesun lars    165    75 Human  
+##  8 R5-D4                  97    32 Droid  
+##  9 Biggs Darklighter     183    84 Human  
+## 10 Obi-Wan Kenobi        182    77 Human  
+## # … with 77 more rows
+```
+
+---
+
+# Add a bmi column (`mass/(0.01*height)^2`)
+
+--
+
+```r
+starwars %&gt;% 
+    select(name, height, mass, species) %&gt;% 
+    mutate(bmi = mass/(0.01*height)^2)
+```
+
+```
+## # A tibble: 87 x 5
+##    name               height  mass species   bmi
+##    &lt;chr&gt;               &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;   &lt;dbl&gt;
+##  1 Luke Skywalker        172    77 Human    26.0
+##  2 C-3PO                 167    75 Droid    26.9
+##  3 R2-D2                  96    32 Droid    34.7
+##  4 Darth Vader           202   136 Human    33.3
+##  5 Leia Organa           150    49 Human    21.8
+##  6 Owen Lars             178   120 Human    37.9
+##  7 Beru Whitesun lars    165    75 Human    27.5
+##  8 R5-D4                  97    32 Droid    34.0
+##  9 Biggs Darklighter     183    84 Human    25.1
+## 10 Obi-Wan Kenobi        182    77 Human    23.2
+## # … with 77 more rows
+```
+
+---
+
+# Sort the data based on the bmi
+--
+
+```r
+starwars %&gt;% 
+    select(name, height, mass, species) %&gt;% 
+    mutate(bmi = mass/(0.01*height)^2) %&gt;% 
+    arrange(desc(bmi))
+```
+
+```
+## # A tibble: 87 x 5
+##    name                  height  mass species          bmi
+##    &lt;chr&gt;                  &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;          &lt;dbl&gt;
+##  1 Jabba Desilijic Tiure    175  1358 Hutt           443. 
+##  2 Dud Bolt                  94    45 Vulptereen      50.9
+##  3 Yoda                      66    17 Yoda's species  39.0
+##  4 Owen Lars                178   120 Human           37.9
+##  5 IG-88                    200   140 Droid           35  
+##  6 R2-D2                     96    32 Droid           34.7
+##  7 Grievous                 216   159 Kaleesh         34.1
+##  8 R5-D4                     97    32 Droid           34.0
+##  9 Jek Tono Porkins         180   110 Human           34.0
+## 10 Darth Vader              202   136 Human           33.3
+## # … with 77 more rows
+```
+
+---
+
+# Filter the data to have only Droids (found in species column)
+
+--
+
+```r
+starwars %&gt;% 
+    select(name, height, mass, species) %&gt;% 
+    mutate(bmi = mass/(0.01*height)^2) %&gt;% 
+    filter(species == "Droid")
+```
+
+```
+## # A tibble: 5 x 5
+##   name  height  mass species   bmi
+##   &lt;chr&gt;  &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;   &lt;dbl&gt;
+## 1 C-3PO    167    75 Droid    26.9
+## 2 R2-D2     96    32 Droid    34.7
+## 3 R5-D4     97    32 Droid    34.0
+## 4 IG-88    200   140 Droid    35  
+## 5 BB8       NA    NA Droid    NA
+```
+
+---
+
+# Filter the same data to have only Droids shorter than 100 cm
+
+--
+
+```r
+starwars %&gt;% 
+    select(name, height, mass, species) %&gt;% 
+    mutate(bmi = mass/(0.01*height)^2) %&gt;% 
+    filter(species == "Droid", height &lt; 100)
+```
+
+```
+## # A tibble: 2 x 5
+##   name  height  mass species   bmi
+##   &lt;chr&gt;  &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;   &lt;dbl&gt;
+## 1 R2-D2     96    32 Droid    34.7
+## 2 R5-D4     97    32 Droid    34.0
+```
+
+---
+
+## Create a summary data in which you have the avarage mass, maximum hight, and the number of individuals from each species, and sort it by the number of individuals
+--
+
+
+```r
+starwars %&gt;% 
+    select(name, height, mass, species) %&gt;% 
+    group_by(species) %&gt;% 
+    summarize(count = n(),
+              avg_mass = mean(mass, na.rm = TRUE),
+              max_height = max(height, na.rm = TRUE)) %&gt;% 
+    arrange(desc(count))
+```
+
+```
+## # A tibble: 38 x 4
+##    species  count avg_mass max_height
+##    &lt;chr&gt;    &lt;int&gt;    &lt;dbl&gt;      &lt;int&gt;
+##  1 Human       35     82.8        202
+##  2 Droid        5     69.8        200
+##  3 &lt;NA&gt;         5     48          183
+##  4 Gungan       3     74          224
+##  5 Kaminoan     2     88          229
+##  6 Mirialan     2     53.1        170
+##  7 Twi'lek      2     55          180
+##  8 Wookiee      2    124          234
+##  9 Zabrak       2     80          175
+## 10 Aleena       1     15           79
+## # … with 28 more rows
+```
+
+---
+
+class: inverse, center, middle
+
+# Your turn
+---
+
+- What is the most common eye color?
+- Who is the youngest human?
+- Which homeworld has the most characters?
+
+---
+
+# What else can you do?
+
+- conditional functions: `*_at`, `*_if`, `*_all`
+- `rename` columns
+- `lead` &amp; `lag` for time series
+- `join` &amp; `bind` data frames
+- `count` &amp; `tally` shortcuts for group_by and summarize
+
+`pivot_wider()` and `pivot_longer()`
+
+---
+![](img/tidyr-spread-gather.gif)
+
+---
+
+# Community matrix!
+
+
+```r
+sw &lt;- starwars %&gt;% 
+  select(name, films) %&gt;% 
+  unnest(films) %&gt;% 
+  mutate(present = 1) %&gt;% 
+  pivot_wider(names_from = name,values_from = present,values_fill = list(present = 0)) %&gt;% 
+  janitor::clean_names() %&gt;% 
+  print()
+```
+
+```
+## # A tibble: 7 x 88
+##   films luke_skywalker c_3po r2_d2 darth_vader leia_organa owen_lars
+##   &lt;chr&gt;          &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;       &lt;dbl&gt;       &lt;dbl&gt;     &lt;dbl&gt;
+## 1 Reve…              1     1     1           1           1         1
+## 2 Retu…              1     1     1           1           1         0
+## 3 The …              1     1     1           1           1         0
+## 4 A Ne…              1     1     1           1           1         1
+## 5 The …              1     0     1           0           1         0
+## 6 Atta…              0     1     1           0           0         1
+## 7 The …              0     1     1           0           0         0
+## # … with 81 more variables: beru_whitesun_lars &lt;dbl&gt;, r5_d4 &lt;dbl&gt;,
+## #   biggs_darklighter &lt;dbl&gt;, obi_wan_kenobi &lt;dbl&gt;, anakin_skywalker &lt;dbl&gt;,
+## #   wilhuff_tarkin &lt;dbl&gt;, chewbacca &lt;dbl&gt;, han_solo &lt;dbl&gt;, greedo &lt;dbl&gt;,
+## #   jabba_desilijic_tiure &lt;dbl&gt;, wedge_antilles &lt;dbl&gt;, jek_tono_porkins &lt;dbl&gt;,
+## #   yoda &lt;dbl&gt;, palpatine &lt;dbl&gt;, boba_fett &lt;dbl&gt;, ig_88 &lt;dbl&gt;, bossk &lt;dbl&gt;,
+## #   lando_calrissian &lt;dbl&gt;, lobot &lt;dbl&gt;, ackbar &lt;dbl&gt;, mon_mothma &lt;dbl&gt;,
+## #   arvel_crynyd &lt;dbl&gt;, wicket_systri_warrick &lt;dbl&gt;, nien_nunb &lt;dbl&gt;,
+## #   qui_gon_jinn &lt;dbl&gt;, nute_gunray &lt;dbl&gt;, finis_valorum &lt;dbl&gt;,
+## #   jar_jar_binks &lt;dbl&gt;, roos_tarpals &lt;dbl&gt;, rugor_nass &lt;dbl&gt;, ric_olie &lt;dbl&gt;,
+## #   watto &lt;dbl&gt;, sebulba &lt;dbl&gt;, quarsh_panaka &lt;dbl&gt;, shmi_skywalker &lt;dbl&gt;,
+## #   darth_maul &lt;dbl&gt;, bib_fortuna &lt;dbl&gt;, ayla_secura &lt;dbl&gt;, dud_bolt &lt;dbl&gt;,
+## #   gasgano &lt;dbl&gt;, ben_quadinaros &lt;dbl&gt;, mace_windu &lt;dbl&gt;, ki_adi_mundi &lt;dbl&gt;,
+## #   kit_fisto &lt;dbl&gt;, eeth_koth &lt;dbl&gt;, adi_gallia &lt;dbl&gt;, saesee_tiin &lt;dbl&gt;,
+## #   yarael_poof &lt;dbl&gt;, plo_koon &lt;dbl&gt;, mas_amedda &lt;dbl&gt;, gregar_typho &lt;dbl&gt;,
+## #   corde &lt;dbl&gt;, cliegg_lars &lt;dbl&gt;, poggle_the_lesser &lt;dbl&gt;,
+## #   luminara_unduli &lt;dbl&gt;, barriss_offee &lt;dbl&gt;, dorme &lt;dbl&gt;, dooku &lt;dbl&gt;,
+## #   bail_prestor_organa &lt;dbl&gt;, jango_fett &lt;dbl&gt;, zam_wesell &lt;dbl&gt;,
+## #   dexter_jettster &lt;dbl&gt;, lama_su &lt;dbl&gt;, taun_we &lt;dbl&gt;, jocasta_nu &lt;dbl&gt;,
+## #   ratts_tyerell &lt;dbl&gt;, r4_p17 &lt;dbl&gt;, wat_tambor &lt;dbl&gt;, san_hill &lt;dbl&gt;,
+## #   shaak_ti &lt;dbl&gt;, grievous &lt;dbl&gt;, tarfful &lt;dbl&gt;, raymus_antilles &lt;dbl&gt;,
+## #   sly_moore &lt;dbl&gt;, tion_medon &lt;dbl&gt;, finn &lt;dbl&gt;, rey &lt;dbl&gt;,
+## #   poe_dameron &lt;dbl&gt;, bb8 &lt;dbl&gt;, captain_phasma &lt;dbl&gt;, padme_amidala &lt;dbl&gt;
+```
+
+---
+
+# Gather back the community matrix to the data
+
+
+```r
+sw %&gt;% 
+  pivot_longer(cols = -films,names_to = "name",values_to = "present")
+```
+
+```
+## # A tibble: 609 x 3
+##    films               name               present
+##    &lt;chr&gt;               &lt;chr&gt;                &lt;dbl&gt;
+##  1 Revenge of the Sith luke_skywalker           1
+##  2 Revenge of the Sith c_3po                    1
+##  3 Revenge of the Sith r2_d2                    1
+##  4 Revenge of the Sith darth_vader              1
+##  5 Revenge of the Sith leia_organa              1
+##  6 Revenge of the Sith owen_lars                1
+##  7 Revenge of the Sith beru_whitesun_lars       1
+##  8 Revenge of the Sith r5_d4                    0
+##  9 Revenge of the Sith biggs_darklighter        0
+## 10 Revenge of the Sith obi_wan_kenobi           1
+## # … with 599 more rows
+```
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="libs/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
