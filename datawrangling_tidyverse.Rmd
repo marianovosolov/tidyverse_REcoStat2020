@@ -120,11 +120,11 @@ class: inverse, center, middle
 # Let's go over the syntax
 
 ---
+class: center, middle
 # `dplyr` function
 
-.center[
+
 <img src="img/dplyr.png" width=30%>
-]
 
 ---
 
@@ -268,22 +268,60 @@ class: inverse, center, middle
 ---
 
 - What is the most common eye color?
+
 - Who is the youngest human?
+
 - Which homeworld has the most characters?
 
 ---
+# Rename columns with `rename()`
+```{r}
+starwars %>% 
+    select(name, height, mass, species) %>% 
+    rename(char_name = name)
+```
+---
+# `rename_all()`
 
+Change all the column names to upper case
+```{r}
+starwars %>% 
+    select(name, height, mass, species) %>% 
+    rename_all(toupper)
+```
+
+---
+# `left_join()`
+
+```{r}
+starwars %>% 
+  mutate(height_m = height*0.01) %>% 
+  select(name,height_m) %>% 
+  left_join(starwars,by = "name")
+```
+
+
+---
 # What else can you do?
 
 - conditional functions: `*_at`, `*_if`, `*_all`
-- `rename` columns
 - `lead` & `lag` for time series
-- `join` & `bind` data frames
-- `count` & `tally` shortcuts for group_by and summarize
-
-`pivot_wider()` and `pivot_longer()`
+- `inner_join`,`semi_join`
+- `bind_cols`, `bind_rows`
 
 ---
+class: center, middle
+
+# `tidyr` functions
+
+<img src="img/tidyr.png" width=30%>
+
+---
+
+### spread == pivot_wider
+
+### gather == pivot_longer
+
 ![](https://raw.githubusercontent.com/gadenbuie/tidyexplain/master/images/tidyr-spread-gather.gif)
 
 ---
@@ -302,16 +340,183 @@ sw <- starwars %>%
 
 ---
 
-# Gather back the community matrix to the data
+# Gather back the community matrix to a long format
 
 ```{r}
 sw %>% 
   pivot_longer(cols = -films,names_to = "name",values_to = "present")
 ```
+---
+class: center, middle
+
+# `readr` package
+
+<img src="img/readr.png" width=30%>
+
+---
+
+# read_xxx function
+
+* Neater import than `read.table` and `read.csv`
+
+* Does data check and prints a report of the data imported
+
+* Character columns are not converted to factors
+
+* Most useful are `read_csv`, `read_table`, and `read_delim`
+
+* Competible with pipe workflow
+
+---
+# Example
+
+```{r}
+mydata<- read_csv("data/sub_PanTHERIA.csv")
+```
+
+---
+
+```{r}
+mydata
+```
 
 
+---
+class: center, middle
+
+# `janitor` package
+
+<img src="img/janitor.png" width=40%>
+---
+# `clean_names()` function
+
+* cleans the column names to something more computer friendly
+
+* For example, brings all the column names to lowercase and adds underscores between words
+---
+
+# Regular column names
+```{r}
+mydata
+```
+
+---
+# Clean column names
+
+```{r}
+mydata %>% 
+  janitor::clean_names()
+```
+
+---
+# `nest` datasets
+
+Useful when you want to run analyses group based but run it only ones
+
+```{r}
+nested_sw<- starwars %>% 
+  select(name,height,films,mass, species,gender) %>% 
+  group_by(gender) %>% 
+  nest() %>% 
+  print()
+
+```
+
+---
+# To see the first sub data
+
+```{r}
+nested_sw$data[1]
+```
+
+---
+class: center, middle
+
+# `purrr` package
+
+<img src="img/purrr.png" width=30%>
+
+---
+
+# `map` function
+
+* transform the input by applying a function to each element. (similar to `apply` function)
+
+```{r}
+starwars %>% 
+  split(.$gender) %>% 
+  map(~ summary(lm(height~mass,data = .)))
+```
+
+---
+# Combin `nest()` with `map()`
+
+```{r}
+lm_nest<- starwars %>% 
+  group_by(gender) %>% 
+  nest() %>% 
+  mutate(lm_results = map(data,~ summary(lm(height~mass,data =.)))) %>% 
+  print()
+
+```
+
+---
+```{r}
+lm_nest$lm_results[1]
+```
+
+---
+class: center, middle
+
+# `broom` package
+
+<img src="img/broom.png" width=30%>
+
+---
+# `tidy()` function
+
+Allows you to print and save model results in a tabular view
+
+```{r}
+broom::tidy(lm_nest$lm_results[[1]])
+```
+
+---
+--- 
+
+.center[
+# Other function that are compatible with ` %>% `
+]
 
 
+---
 
+## `ggplot2` 
 
+* can be piped into the sequence
+```{r fig.height=4, fig.width=4, message=FALSE, warning=FALSE}
+starwars %>% 
+  select(height,mass,species) %>% 
+  ggplot(.,aes(log10(mass),log10(height),color = species))+
+  geom_point()+
+  theme(legend.position = "none")
+```
+
+---
+### omit all rows that contain `NA` somewhere in the data
+
+```{r}
+starwars %>% 
+  na.omit()
+```
+
+---
+# Run models on subset of the data
+
+```{r}
+starwars %>% 
+  filter(species =="Droid") %>% 
+  lm(height~mass,data = .) %>% 
+  summary()
+```
 
