@@ -284,7 +284,7 @@ class: inverse, center, middle
 `pivot_wider()` and `pivot_longer()`
 
 ---
-![](img/tidyr-spread-gather.gif)
+![](https://raw.githubusercontent.com/gadenbuie/tidyexplain/master/images/tidyr-spread-gather.gif)
 
 ---
 
