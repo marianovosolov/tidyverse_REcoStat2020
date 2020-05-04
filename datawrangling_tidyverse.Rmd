@@ -115,45 +115,6 @@ as_tibble(iris)
 
 ---
 
-class: inverse, center, middle
-
-# Let's go over the syntax
-
----
-class: center, middle
-# `dplyr` function
-
-
-<img src="img/dplyr.png" width=30%>
-
----
-
-# `select()`
-
-![](img/xls-select.PNG)
-
----
-
-# `filter()`
-
-![](img/xls-filter.PNG)
-
----
-# `arrange()`
-
-![](img/xls-arrange.PNG)
----
-
-# `mutate()`
-
-![](img/xls-mutate.PNG)
----
-
-# `group_by(), summarize()`
-
-![](img/xls-summary.PNG)
----
-
 # Pipe ("then")
 
 .pull-left[
@@ -175,178 +136,17 @@ data %>%
 ```
 ]
 
-
+.footnote[
+* keyboard shortcut: ctrl/cmd + shift + m
+]
 --- 
 ---
-class: inverse, center, middle
-
-# Lets start practicing 
----
-
-# Load the Star Wars data
-
-```{r}
-library(tidyverse)
-data(starwars)
-starwars
-```
----
-# Select the name, height, mass, and species columns only
-
---
-```{r}
-starwars %>% 
-    select(name, height, mass, species)
-```
-
----
-
-# Add a bmi column (`mass/(0.01*height)^2`)
-
---
-```{r}
-starwars %>% 
-    select(name, height, mass, species) %>% 
-    mutate(bmi = mass/(0.01*height)^2)
-```
-
----
-
-# Sort the data based on the bmi
---
-```{r}
-starwars %>% 
-    select(name, height, mass, species) %>% 
-    mutate(bmi = mass/(0.01*height)^2) %>% 
-    arrange(desc(bmi))
-```
-
----
-
-# Filter the data to have only Droids (found in species column)
-
---
-```{r}
-starwars %>% 
-    select(name, height, mass, species) %>% 
-    mutate(bmi = mass/(0.01*height)^2) %>% 
-    filter(species == "Droid")
-```
-
----
-
-# Filter the same data to have only Droids shorter than 100 cm
-
---
-```{r}
-starwars %>% 
-    select(name, height, mass, species) %>% 
-    mutate(bmi = mass/(0.01*height)^2) %>% 
-    filter(species == "Droid", height < 100)
-```
-
----
-
-## Create a summary data in which you have the avarage mass, maximum hight, and the number of individuals from each species, and sort it by the number of individuals
---
-
-```{r}
-starwars %>% 
-    select(name, height, mass, species) %>% 
-    group_by(species) %>% 
-    summarize(count = n(),
-              avg_mass = mean(mass, na.rm = TRUE),
-              max_height = max(height, na.rm = TRUE)) %>% 
-    arrange(desc(count))
-```
-
----
 
 class: inverse, center, middle
 
-# Your turn
+# Let's go over the various packages
 ---
 
-- What is the most common eye color?
-
-- Who is the youngest human?
-
-- Which homeworld has the most characters?
-
----
-# Rename columns with `rename()`
-```{r}
-starwars %>% 
-    select(name, height, mass, species) %>% 
-    rename(char_name = name)
-```
----
-# `rename_all()`
-
-Change all the column names to upper case
-```{r}
-starwars %>% 
-    select(name, height, mass, species) %>% 
-    rename_all(toupper)
-```
-
----
-# `left_join()`
-
-```{r}
-starwars %>% 
-  mutate(height_m = height*0.01) %>% 
-  select(name,height_m) %>% 
-  left_join(starwars,by = "name")
-```
-
-
----
-# What else can you do?
-
-- conditional functions: `*_at`, `*_if`, `*_all`
-- `lead` & `lag` for time series
-- `inner_join`,`semi_join`
-- `bind_cols`, `bind_rows`
-
----
-class: center, middle
-
-# `tidyr` functions
-
-<img src="img/tidyr.png" width=30%>
-
----
-
-### spread == pivot_wider
-
-### gather == pivot_longer
-
-![](https://raw.githubusercontent.com/gadenbuie/tidyexplain/master/images/tidyr-spread-gather.gif)
-
----
-
-# Community matrix!
-
-```{r}
-sw <- starwars %>% 
-  select(name, films) %>% 
-  unnest(films) %>% 
-  mutate(present = 1) %>% 
-  pivot_wider(names_from = name,values_from = present,values_fill = list(present = 0)) %>% 
-  janitor::clean_names() %>% 
-  print()
-```
-
----
-
-# Gather back the community matrix to a long format
-
-```{r}
-sw %>% 
-  pivot_longer(cols = -films,names_to = "name",values_to = "present")
-```
----
 class: center, middle
 
 # `readr` package
@@ -407,82 +207,245 @@ mydata
 mydata %>% 
   janitor::clean_names()
 ```
-
 ---
-# `nest` datasets
 
-Useful when you want to run analyses group based but run it only ones
-
-```{r}
-nested_sw<- starwars %>% 
-  select(name,height,films,mass, species,gender) %>% 
-  group_by(gender) %>% 
-  nest() %>% 
-  print()
-
+# Can also be:
+```{r warning=FALSE,message=FALSE}
+mydata<- read_csv("data/sub_PanTHERIA.csv") %>% 
+  janitor::clean_names()
+mydata
 ```
 
 ---
-# To see the first sub data
+class: exercise, center, middle
 
-```{r}
-nested_sw$data[1]
-```
+# Lets practice!
 
+## Load the data and change all the column names to caps lock
+
+.footnote[
+**Hint:** Check the help file for the `clean_names()` function
+]
 ---
 class: center, middle
+# `dplyr` function
 
-# `purrr` package
 
-<img src="img/purrr.png" width=30%>
+<img src="img/dplyr.png" width=30%>
+
+---
+# Load the Star Wars data
+
+```{r}
+library(tidyverse)
+data(starwars)
+starwars
+```
 
 ---
 
-# `map` function
+# `select()`
 
-* transform the input by applying a function to each element. (similar to `apply` function)
+![](img/xls-select.PNG)
+
+---
+# Select the name, height, mass, and species columns only
 
 ```{r}
 starwars %>% 
-  split(.$gender) %>% 
-  map(~ summary(lm(height~mass,data = .)))
+    select(name, height, mass, species)
 ```
 
 ---
-# Combin `nest()` with `map()`
+
+# `mutate()`
+
+![](img/xls-mutate.PNG)
+---
+# Add a bmi column
+
 
 ```{r}
-lm_nest<- starwars %>% 
-  group_by(gender) %>% 
-  nest() %>% 
-  mutate(lm_results = map(data,~ summary(lm(height~mass,data =.)))) %>% 
-  print()
-
+starwars %>% 
+    select(name, height, mass, species) %>% 
+    mutate(bmi = mass/(0.01*height)^2)
 ```
 
 ---
+
+class: exercise, center, middle
+
+# Your turn!
+
+## select the height, gender, and species and add a new column with height in meters
+
+---
+
+# `filter()`
+
+![](img/xls-filter.PNG)
+
+---
+# Filter the data to have only Droids (found in species column)
+
+
 ```{r}
-lm_nest$lm_results[1]
+starwars %>% 
+    select(name, height, mass, species) %>% 
+    mutate(bmi = mass/(0.01*height)^2) %>% 
+    filter(species == "Droid")
 ```
+
+---
+# Filter the same data to have only Droids shorter than 100 cm
+
+
+```{r}
+starwars %>% 
+    select(name, height, mass, species) %>% 
+    mutate(bmi = mass/(0.01*height)^2) %>% 
+    filter(species == "Droid", height < 100)
+```
+
+---
+
+# `arrange()`
+
+![](img/xls-arrange.PNG)
+---
+
+# Sort the data based on the bmi
+
+```{r}
+starwars %>% 
+    select(name, height, mass, species) %>% 
+    mutate(bmi = mass/(0.01*height)^2) %>% 
+    arrange(desc(bmi))
+```
+
+---
+# `group_by(), summarize()`
+
+![](img/xls-summary.PNG)
+
+
+---
+
+## Create a summary data in which you have the avarage mass and maximum hight each species, and sort it by the avarage mass
+
+
+```{r}
+starwars %>% 
+    select(name, height, mass, species) %>% 
+    group_by(species) %>% 
+    summarize(avg_mass = mean(mass, na.rm = TRUE),
+              max_height = max(height, na.rm = TRUE)) %>% 
+    arrange(desc(avg_mass))
+```
+
+---
+
+class: exercise, middle
+
+# Your turn!
+
+What is the most common eye color?
+
+Who is the youngest human?
+
+Which homeworld has the most characters?
+
+---
+# Rename columns with `rename()`
+```{r}
+starwars %>% 
+    select(name, height, mass, species) %>% 
+    rename(char_name = name)
+```
+---
+
+# `rename_all()`
+
+Change all the column names to upper case
+```{r}
+starwars %>% 
+    select(name, height, mass, species) %>% 
+    rename_all(toupper)
+```
+
+---
+# `left_join()`
+
+```{r}
+starwars %>% 
+  mutate(height_m = height*0.01) %>% 
+  select(name,height_m) %>% 
+  left_join(starwars,by = "name")
+```
+
+
+---
+
+class: exercise, center, middle
+
+# Practice time!
+
+Create a new data with species mass, calculate the bmi, and join it with the starwars data
+
+---
+# What else can you do?
+
+- conditional functions: `*_at`, `*_if`, `*_all`
+- `lead` & `lag` for time series
+- `inner_join`,`semi_join`
+- `bind_cols`, `bind_rows`
 
 ---
 class: center, middle
 
-# `broom` package
+# `tidyr` functions
 
-<img src="img/broom.png" width=30%>
+<img src="img/tidyr.png" width=30%>
 
 ---
-# `tidy()` function
 
-Allows you to print and save model results in a tabular view
+### spread == pivot_wider
+
+### gather == pivot_longer
+
+![](https://raw.githubusercontent.com/gadenbuie/tidyexplain/master/images/tidyr-spread-gather.gif)
+
+---
+
+# Community matrix!
 
 ```{r}
-broom::tidy(lm_nest$lm_results[[1]])
+sw <- starwars %>% 
+  select(name, films) %>% 
+  unnest(films) %>% 
+  mutate(present = 1) %>% 
+  pivot_wider(names_from = name,values_from = present,values_fill = list(present = 0)) %>% 
+  janitor::clean_names() %>% 
+  print()
 ```
 
 ---
---- 
+
+# Gather back the community matrix to a long format
+
+```{r}
+sw %>% 
+  pivot_longer(cols = -films,names_to = "name",values_to = "present")
+```
+---
+
+class: exercise, center, middle
+
+#Lets practice!
+
+create a long format of the subset data of species, mass, height, and birth year with the species column, one column with the categories mass,height, birth year and one column with the values
+
+---
 
 .center[
 # Other function that are compatible with ` %>% `
@@ -507,7 +470,7 @@ starwars %>%
 
 ```{r}
 starwars %>% 
-  na.omit()
+  na.omit() #<<
 ```
 
 ---
@@ -520,3 +483,38 @@ starwars %>%
   summary()
 ```
 
+---
+
+# Make it into a nice tibble
+
+```{r}
+starwars %>% 
+  filter(species =="Droid") %>% 
+  lm(height~mass,data = .) %>% 
+  summary()%>% 
+  broom::tidy() #<<
+```
+
+---
+
+class: inverse, center, middle
+
+# Homework Time
+
+---
+
+# Some instructions
+
+- Uninstall the previous lesson with
+
+  `uninstall_course("exercise_REcoStat2020")`
+  
+- Re-install it with `install_course_github("marianovosolov","exercise_REcoStat2020")`
+
+- Start with `swirl()`
+
+- Give it a new name
+
+- Choose the tidyverse exercise within the exercise_REcoStat2020
+
+- Good luck!!
