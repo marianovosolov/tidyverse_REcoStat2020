@@ -5,6 +5,7 @@
     <meta charset="utf-8" />
     <link href="libs/remark-css/default.css" rel="stylesheet" />
     <script src="libs/xaringanExtra-logo/logo.js"></script>
+    <link href="libs/font-awesome/css/fontawesome-all.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="custom-fonts.css" type="text/css" />
   </head>
   <body>
@@ -13,7 +14,7 @@ class: center, middle, inverse, title-slide
 
 # Data wrangling with <code>tidyverse</code>
 ## Maria Novosolov
-### 04-05-2020
+### 05-05-2020
 
 ---
 
@@ -456,7 +457,7 @@ mydata
 
 ```r
 mydata %&gt;% 
-  janitor::clean_names()
+* janitor::clean_names()
 ```
 
 ```
@@ -567,7 +568,7 @@ starwars
 
 ```r
 starwars %&gt;% 
-    select(name, height, mass, species)
+*   select(name, height, mass, species)
 ```
 
 ```
@@ -600,7 +601,7 @@ starwars %&gt;%
 ```r
 starwars %&gt;% 
     select(name, height, mass, species) %&gt;% 
-    mutate(bmi = mass/(0.01*height)^2)
+*   mutate(bmi = mass/(0.01*height)^2)
 ```
 
 ```
@@ -643,7 +644,7 @@ class: exercise, center, middle
 starwars %&gt;% 
     select(name, height, mass, species) %&gt;% 
     mutate(bmi = mass/(0.01*height)^2) %&gt;% 
-    filter(species == "Droid")
+*   filter(species == "Droid")
 ```
 
 ```
@@ -667,7 +668,7 @@ starwars %&gt;%
 starwars %&gt;% 
     select(name, height, mass, species) %&gt;% 
     mutate(bmi = mass/(0.01*height)^2) %&gt;% 
-    filter(species == "Droid", height &lt; 100)
+*   filter(species == "Droid", height &lt; 100)
 ```
 
 ```
@@ -693,7 +694,7 @@ starwars %&gt;%
 starwars %&gt;% 
     select(name, height, mass, species) %&gt;% 
     mutate(bmi = mass/(0.01*height)^2) %&gt;% 
-    arrange(desc(bmi))
+*   arrange(desc(bmi))
 ```
 
 ```
@@ -721,17 +722,18 @@ starwars %&gt;%
 
 ---
 
-## Create a summary data in which you have the avarage mass and maximum hight each species, and sort it by the avarage mass
+## Create a summary data in which you have the avarage mass and maximum hight for each species, 
+## and sort it by the avarage mass
 
 
 
 ```r
 starwars %&gt;% 
     select(name, height, mass, species) %&gt;% 
-    group_by(species) %&gt;% 
-    summarize(avg_mass = mean(mass, na.rm = TRUE),
+*   group_by(species) %&gt;%
+*   summarize(avg_mass = mean(mass, na.rm = TRUE),
               max_height = max(height, na.rm = TRUE)) %&gt;% 
-    arrange(desc(avg_mass))
+*   arrange(desc(avg_mass))
 ```
 
 ```
@@ -769,7 +771,7 @@ Which homeworld has the most characters?
 ```r
 starwars %&gt;% 
     select(name, height, mass, species) %&gt;% 
-    rename(char_name = name)
+*   rename(char_name = name)
 ```
 
 ```
@@ -797,7 +799,7 @@ Change all the column names to upper case
 ```r
 starwars %&gt;% 
     select(name, height, mass, species) %&gt;% 
-    rename_all(toupper)
+*   rename_all(toupper)
 ```
 
 ```
@@ -825,7 +827,7 @@ starwars %&gt;%
 starwars %&gt;% 
   mutate(height_m = height*0.01) %&gt;% 
   select(name,height_m) %&gt;% 
-  left_join(starwars,by = "name")
+* left_join(starwars,by = "name")
 ```
 
 ```
@@ -853,7 +855,7 @@ class: exercise, center, middle
 
 # Practice time!
 
-Create a new data with species mass, calculate the bmi, and join it with the starwars data
+Create a new data with species, mass, and height, calculate the bmi, and join it with the starwars data
 
 ---
 # What else can you do?
@@ -888,7 +890,7 @@ sw &lt;- starwars %&gt;%
   select(name, films) %&gt;% 
   unnest(films) %&gt;% 
   mutate(present = 1) %&gt;% 
-  pivot_wider(names_from = name,values_from = present,values_fill = list(present = 0)) %&gt;% 
+* pivot_wider(names_from = name,values_from = present,values_fill = list(present = 0)) %&gt;%
   janitor::clean_names() %&gt;% 
   print()
 ```
@@ -935,7 +937,7 @@ sw &lt;- starwars %&gt;%
 
 ```r
 sw %&gt;% 
-  pivot_longer(cols = -films,names_to = "name",values_to = "present")
+* pivot_longer(cols = -films,names_to = "name",values_to = "present")
 ```
 
 ```
@@ -960,7 +962,8 @@ class: exercise, center, middle
 
 #Lets practice!
 
-create a long format of the subset data of species, mass, height, and birth year with the species column, one column with the categories mass,height, birth year and one column with the values
+Subset the data to have species, mass, height, and birth year columns. 
+Then create a long format with species as untouched column, one column with the categories (mass,height, birth year), and one column with the values.
 
 ---
 
@@ -978,7 +981,7 @@ create a long format of the subset data of species, mass, height, and birth year
 ```r
 starwars %&gt;% 
   select(height,mass,species) %&gt;% 
-  ggplot(.,aes(log10(mass),log10(height),color = species))+
+* ggplot(.,aes(log10(mass),log10(height),color = species))+
   geom_point()+
   theme(legend.position = "none")
 ```
@@ -1019,7 +1022,7 @@ starwars %&gt;%
 ```r
 starwars %&gt;% 
   filter(species =="Droid") %&gt;% 
-  lm(height~mass,data = .) %&gt;% 
+* lm(height~mass,data = .) %&gt;%
   summary()
 ```
 
@@ -1044,6 +1047,18 @@ starwars %&gt;%
 ## Multiple R-squared:  0.921,	Adjusted R-squared:  0.8815 
 ## F-statistic: 23.32 on 1 and 2 DF,  p-value: 0.04031
 ```
+---
+class: center, middle
+
+# `broom` package
+
+&lt;img src="img/broom.png" width=30%&gt;
+
+
+---
+# `tidy()` function
+
+Allows you to print and save model results in a tabular view
 
 ---
 
@@ -1089,6 +1104,184 @@ class: inverse, center, middle
 - Choose the tidyverse exercise within the exercise_REcoStat2020
 
 - Good luck!!
+
+---
+class: inverse, center, middle
+
+# Additional useful (though more tricky to understand) functions
+
+---
+# `nest` datasets
+
+Useful when you want to run analyses group based but run it only ones
+
+
+```r
+nested_sw&lt;- starwars %&gt;% 
+  select(name,height,films,mass, species,gender) %&gt;% 
+  group_by(gender) %&gt;% 
+* nest() %&gt;%
+  print()
+```
+
+```
+## # A tibble: 3 x 2
+## # Groups:   gender [3]
+##   gender    data             
+##   &lt;chr&gt;     &lt;list&gt;           
+## 1 masculine &lt;tibble [66 × 5]&gt;
+## 2 feminine  &lt;tibble [17 × 5]&gt;
+## 3 &lt;NA&gt;      &lt;tibble [4 × 5]&gt;
+```
+
+---
+# To see the first sub data
+
+
+```r
+nested_sw$data[1]
+```
+
+```
+## [[1]]
+## # A tibble: 66 x 5
+##    name              height films      mass species
+##    &lt;chr&gt;              &lt;int&gt; &lt;list&gt;    &lt;dbl&gt; &lt;chr&gt;  
+##  1 Luke Skywalker       172 &lt;chr [5]&gt;    77 Human  
+##  2 C-3PO                167 &lt;chr [6]&gt;    75 Droid  
+##  3 R2-D2                 96 &lt;chr [7]&gt;    32 Droid  
+##  4 Darth Vader          202 &lt;chr [4]&gt;   136 Human  
+##  5 Owen Lars            178 &lt;chr [3]&gt;   120 Human  
+##  6 R5-D4                 97 &lt;chr [1]&gt;    32 Droid  
+##  7 Biggs Darklighter    183 &lt;chr [1]&gt;    84 Human  
+##  8 Obi-Wan Kenobi       182 &lt;chr [6]&gt;    77 Human  
+##  9 Anakin Skywalker     188 &lt;chr [3]&gt;    84 Human  
+## 10 Wilhuff Tarkin       180 &lt;chr [2]&gt;    NA Human  
+## # … with 56 more rows
+```
+
+---
+class: center, middle
+
+# `purrr` package
+
+&lt;img src="img/purrr.png" width=30%&gt;
+
+---
+
+# `map` function
+
+* transform the input by applying a function to each element. (similar to `apply` function)
+
+
+```r
+starwars %&gt;% 
+  split(.$gender) %&gt;% 
+* map(~ summary(lm(height~mass,data = .)))
+```
+
+```
+## $feminine
+## 
+## Call:
+## lm(formula = height ~ mass, data = .)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -19.005  -3.773  -1.351   8.533  14.938 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) 166.1725    24.1378   6.884 0.000235 ***
+## mass          0.0578     0.4366   0.132 0.898409    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 10.61 on 7 degrees of freedom
+##   (8 observations deleted due to missingness)
+## Multiple R-squared:  0.002497,	Adjusted R-squared:  -0.14 
+## F-statistic: 0.01752 on 1 and 7 DF,  p-value: 0.8984
+## 
+## 
+## $masculine
+## 
+## Call:
+## lm(formula = height ~ mass, data = .)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -106.365   -3.947    8.917   19.790   58.390 
+## 
+## Coefficients:
+##              Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) 171.90167    6.41633  26.791   &lt;2e-16 ***
+## mass          0.02727    0.03032   0.899    0.373    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 38.86 on 47 degrees of freedom
+##   (17 observations deleted due to missingness)
+## Multiple R-squared:  0.01692,	Adjusted R-squared:  -0.004001 
+## F-statistic: 0.8087 on 1 and 47 DF,  p-value: 0.3731
+```
+
+---
+# Combine `nest()` with `map()`
+
+
+```r
+lm_nest&lt;- starwars %&gt;% 
+  group_by(gender) %&gt;% 
+  nest() %&gt;% 
+* mutate(lm_results = map(data,~ summary(lm(height~mass,data =.)))) %&gt;%
+  print()
+```
+
+```
+## # A tibble: 3 x 3
+## # Groups:   gender [3]
+##   gender    data               lm_results
+##   &lt;chr&gt;     &lt;list&gt;             &lt;list&gt;    
+## 1 masculine &lt;tibble [66 × 13]&gt; &lt;smmry.lm&gt;
+## 2 feminine  &lt;tibble [17 × 13]&gt; &lt;smmry.lm&gt;
+## 3 &lt;NA&gt;      &lt;tibble [4 × 13]&gt;  &lt;smmry.lm&gt;
+```
+
+---
+
+```r
+lm_nest$lm_results[1]
+```
+
+```
+## [[1]]
+## 
+## Call:
+## lm(formula = height ~ mass, data = .)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -106.365   -3.947    8.917   19.790   58.390 
+## 
+## Coefficients:
+##              Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) 171.90167    6.41633  26.791   &lt;2e-16 ***
+## mass          0.02727    0.03032   0.899    0.373    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 38.86 on 47 degrees of freedom
+##   (17 observations deleted due to missingness)
+## Multiple R-squared:  0.01692,	Adjusted R-squared:  -0.004001 
+## F-statistic: 0.8087 on 1 and 47 DF,  p-value: 0.3731
+```
+
+
+---
+
+class: inverse, center, middle
+
+# Now it's really the end <i class="fas  fa-smile "></i>
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="libs/remark-latest.min.js"></script>

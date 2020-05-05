@@ -205,7 +205,7 @@ mydata
 
 ```{r}
 mydata %>% 
-  janitor::clean_names()
+  janitor::clean_names() #<<
 ```
 ---
 
@@ -253,7 +253,7 @@ starwars
 
 ```{r}
 starwars %>% 
-    select(name, height, mass, species)
+    select(name, height, mass, species) #<<
 ```
 
 ---
@@ -268,7 +268,7 @@ starwars %>%
 ```{r}
 starwars %>% 
     select(name, height, mass, species) %>% 
-    mutate(bmi = mass/(0.01*height)^2)
+    mutate(bmi = mass/(0.01*height)^2) #<<
 ```
 
 ---
@@ -293,7 +293,7 @@ class: exercise, center, middle
 starwars %>% 
     select(name, height, mass, species) %>% 
     mutate(bmi = mass/(0.01*height)^2) %>% 
-    filter(species == "Droid")
+    filter(species == "Droid") #<<
 ```
 
 ---
@@ -304,7 +304,7 @@ starwars %>%
 starwars %>% 
     select(name, height, mass, species) %>% 
     mutate(bmi = mass/(0.01*height)^2) %>% 
-    filter(species == "Droid", height < 100)
+    filter(species == "Droid", height < 100) #<<
 ```
 
 ---
@@ -320,7 +320,7 @@ starwars %>%
 starwars %>% 
     select(name, height, mass, species) %>% 
     mutate(bmi = mass/(0.01*height)^2) %>% 
-    arrange(desc(bmi))
+    arrange(desc(bmi)) #<<
 ```
 
 ---
@@ -331,16 +331,17 @@ starwars %>%
 
 ---
 
-## Create a summary data in which you have the avarage mass and maximum hight each species, and sort it by the avarage mass
+## Create a summary data in which you have the avarage mass and maximum hight for each species, 
+## and sort it by the avarage mass
 
 
 ```{r}
 starwars %>% 
     select(name, height, mass, species) %>% 
-    group_by(species) %>% 
-    summarize(avg_mass = mean(mass, na.rm = TRUE),
+    group_by(species) %>% #<<
+    summarize(avg_mass = mean(mass, na.rm = TRUE), #<<
               max_height = max(height, na.rm = TRUE)) %>% 
-    arrange(desc(avg_mass))
+    arrange(desc(avg_mass)) #<<
 ```
 
 ---
@@ -360,7 +361,7 @@ Which homeworld has the most characters?
 ```{r}
 starwars %>% 
     select(name, height, mass, species) %>% 
-    rename(char_name = name)
+    rename(char_name = name) #<<
 ```
 ---
 
@@ -370,7 +371,7 @@ Change all the column names to upper case
 ```{r}
 starwars %>% 
     select(name, height, mass, species) %>% 
-    rename_all(toupper)
+    rename_all(toupper) #<<
 ```
 
 ---
@@ -380,7 +381,7 @@ starwars %>%
 starwars %>% 
   mutate(height_m = height*0.01) %>% 
   select(name,height_m) %>% 
-  left_join(starwars,by = "name")
+  left_join(starwars,by = "name") #<<
 ```
 
 
@@ -390,7 +391,7 @@ class: exercise, center, middle
 
 # Practice time!
 
-Create a new data with species mass, calculate the bmi, and join it with the starwars data
+Create a new data with species, mass, and height, calculate the bmi, and join it with the starwars data
 
 ---
 # What else can you do?
@@ -424,7 +425,7 @@ sw <- starwars %>%
   select(name, films) %>% 
   unnest(films) %>% 
   mutate(present = 1) %>% 
-  pivot_wider(names_from = name,values_from = present,values_fill = list(present = 0)) %>% 
+  pivot_wider(names_from = name,values_from = present,values_fill = list(present = 0)) %>% #<<
   janitor::clean_names() %>% 
   print()
 ```
@@ -435,7 +436,7 @@ sw <- starwars %>%
 
 ```{r}
 sw %>% 
-  pivot_longer(cols = -films,names_to = "name",values_to = "present")
+  pivot_longer(cols = -films,names_to = "name",values_to = "present") #<<
 ```
 ---
 
@@ -443,7 +444,8 @@ class: exercise, center, middle
 
 #Lets practice!
 
-create a long format of the subset data of species, mass, height, and birth year with the species column, one column with the categories mass,height, birth year and one column with the values
+Subset the data to have species, mass, height, and birth year columns. 
+Then create a long format with species as untouched column, one column with the categories (mass,height, birth year), and one column with the values.
 
 ---
 
@@ -460,7 +462,7 @@ create a long format of the subset data of species, mass, height, and birth year
 ```{r fig.height=4, fig.width=4, message=FALSE, warning=FALSE}
 starwars %>% 
   select(height,mass,species) %>% 
-  ggplot(.,aes(log10(mass),log10(height),color = species))+
+  ggplot(.,aes(log10(mass),log10(height),color = species))+ #<<
   geom_point()+
   theme(legend.position = "none")
 ```
@@ -479,9 +481,21 @@ starwars %>%
 ```{r}
 starwars %>% 
   filter(species =="Droid") %>% 
-  lm(height~mass,data = .) %>% 
+  lm(height~mass,data = .) %>% #<<
   summary()
 ```
+---
+class: center, middle
+
+# `broom` package
+
+<img src="img/broom.png" width=30%>
+
+
+---
+# `tidy()` function
+
+Allows you to print and save model results in a tabular view
 
 ---
 
@@ -518,3 +532,72 @@ class: inverse, center, middle
 - Choose the tidyverse exercise within the exercise_REcoStat2020
 
 - Good luck!!
+
+---
+class: inverse, center, middle
+
+# Additional useful (though more tricky to understand) functions
+
+---
+# `nest` datasets
+
+Useful when you want to run analyses group based but run it only ones
+
+```{r}
+nested_sw<- starwars %>% 
+  select(name,height,films,mass, species,gender) %>% 
+  group_by(gender) %>% 
+  nest() %>% #<<
+  print()
+
+```
+
+---
+# To see the first sub data
+
+```{r}
+nested_sw$data[1]
+```
+
+---
+class: center, middle
+
+# `purrr` package
+
+<img src="img/purrr.png" width=30%>
+
+---
+
+# `map` function
+
+* transform the input by applying a function to each element. (similar to `apply` function)
+
+```{r}
+starwars %>% 
+  split(.$gender) %>% 
+  map(~ summary(lm(height~mass,data = .))) #<<
+```
+
+---
+# Combine `nest()` with `map()`
+
+```{r}
+lm_nest<- starwars %>% 
+  group_by(gender) %>% 
+  nest() %>% 
+  mutate(lm_results = map(data,~ summary(lm(height~mass,data =.)))) %>% #<<
+  print()
+
+```
+
+---
+```{r}
+lm_nest$lm_results[1]
+```
+
+
+---
+
+class: inverse, center, middle
+
+# Now it's really the end `r icon::fa("smile")`
